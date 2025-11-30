@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>Connexion
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% if error %}
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+
+                        {% if app.user %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Vous êtes déjà connecté en tant que {{ app.user.userIdentifier }},
+                                <a href="{{ path('app_logout') }}">Déconnexion</a>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="inputEmail" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>Adresse email
+                            </label>
+                            <input type="email" value="{{ last_username }}" name="email" id="inputEmail"
+                                   class="form-control form-control-lg"
+                                   placeholder="votre@email.com"
+                                   autocomplete="email" required autofocus>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="inputPassword" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Mot de passe
+                            </label>
+                            <input type="password" name="password" id="inputPassword"
+                                   class="form-control form-control-lg"
+                                   placeholder="Votre mot de passe"
+                                   autocomplete="current-password" required>
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-2">Pas encore de compte ?</p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('app_register_etudiant') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-graduation-cap me-2"></i>Inscription Étudiant
+                            </a>
+                            <a href="{{ path('app_register_entreprise') }}" class="btn btn-outline-success">
+                                <i class="fas fa-building me-2"></i>Inscription Entreprise
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

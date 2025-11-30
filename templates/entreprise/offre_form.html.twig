@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ edit ? 'Modifier' : 'Nouvelle' }} Offre de Stage{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header {{ edit ? 'bg-warning' : 'bg-primary' }} text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas {{ edit ? 'fa-edit' : 'fa-plus' }} me-2"></i>
+                        {{ edit ? 'Modifier l\'offre' : 'Nouvelle offre de stage' }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    {{ form_row(form.titre, {
+                        'attr': {'class': 'form-control'},
+                        'label': 'Titre de l\'offre'
+                    }) }}
+
+                    {{ form_row(form.description, {
+                        'attr': {'class': 'form-control', 'rows': 5},
+                        'label': 'Description'
+                    }) }}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_row(form.dateDebut, {
+                                'attr': {'class': 'form-control'},
+                                'label': 'Date de début'
+                            }) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.dateFin, {
+                                'attr': {'class': 'form-control'},
+                                'label': 'Date de fin'
+                            }) }}
+                        </div>
+                    </div>
+
+                    {{ form_row(form.lettreMotivationRequise, {
+                        'attr': {'class': 'form-check-input'},
+                        'label': 'Lettre de motivation requise'
+                    }) }}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn {{ edit ? 'btn-warning' : 'btn-primary' }} btn-lg">
+                            <i class="fas {{ edit ? 'fa-save' : 'fa-plus' }} me-2"></i>
+                            {{ edit ? 'Modifier l\'offre' : 'Créer l\'offre' }}
+                        </button>
+                        <a href="{{ path('app_entreprise_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+                        </a>
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

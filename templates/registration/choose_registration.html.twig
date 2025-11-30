@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choix d'inscription{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="text-center mb-5">
+                <h1 class="display-4">Choisissez votre type de compte</h1>
+                <p class="lead">Sélectionnez le type de compte qui correspond à votre profil</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 text-center border-primary">
+                        <div class="card-body">
+                            <i class="fas fa-graduation-cap fa-4x text-primary mb-3"></i>
+                            <h3 class="card-title">Étudiant</h3>
+                            <p class="card-text">Je cherche un stage pour ma formation</p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Consulter les offres de stage</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Postuler en ligne</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Gérer mes candidatures</li>
+                            </ul>
+                            <a href="{{ path('app_register_etudiant') }}" class="btn btn-primary btn-lg mt-3">
+                                S'inscrire comme étudiant
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 text-center border-success">
+                        <div class="card-body">
+                            <i class="fas fa-building fa-4x text-success mb-3"></i>
+                            <h3 class="card-title">Entreprise</h3>
+                            <p class="card-text">Je propose des stages dans mon entreprise</p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Publier des offres de stage</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Recevoir des candidatures</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Gérer les candidats</li>
+                            </ul>
+                            <a href="{{ path('app_register_entreprise') }}" class="btn btn-success btn-lg mt-3">
+                                S'inscrire comme entreprise
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p>Vous avez déjà un compte ? <a href="{{ path('app_login') }}">Connectez-vous</a></p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

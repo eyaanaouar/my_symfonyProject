@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription Entreprise{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-building me-2"></i>Inscription Entreprise
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {{ form_start(registrationForm) }}
+                    {{ form_row(registrationForm.nom, {
+                        'attr': {'class': 'form-control'},
+                        'label': 'Nom de l\'entreprise'
+                    }) }}
+
+                    {{ form_row(registrationForm.email, {
+                        'attr': {'class': 'form-control'},
+                        'label': 'Email'
+                    }) }}
+
+                    {{ form_row(registrationForm.adresse, {
+                        'attr': {'class': 'form-control', 'rows': 3},
+                        'label': 'Adresse'
+                    }) }}
+
+                    {{ form_row(registrationForm.telephone, {
+                        'attr': {'class': 'form-control'},
+                        'label': 'Téléphone'
+                    }) }}
+
+                    {{ form_row(registrationForm.plainPassword, {
+                        'attr': {'class': 'form-control'},
+                        'label': 'Mot de passe'
+                    }) }}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-building me-2"></i>S'inscrire comme entreprise
+                        </button>
+                    </div>
+                    {{ form_end(registrationForm) }}
+
+                    <div class="mt-3 text-center">
+                        <p>Déjà un compte ? <a href="{{ path('app_login') }}">Connectez-vous</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

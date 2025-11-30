@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Candidatures - {{ offre.titre }}{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-users me-2"></i>Candidatures
+                </h1>
+                <a href="{{ path('app_entreprise_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+                </a>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>{{ offre.titre }}</h5>
+                    <p class="mb-0"><strong>Nombre de candidatures :</strong> {{ candidatures|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if candidatures|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Étudiant</th>
+                                    <th>Email</th>
+                                    <th>Date de candidature</th>
+                                    <th>Statut</th>
+                                    <th>Message</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for candidature in candidatures %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ candidature.etudiant.prenom }} {{ candidature.etudiant.nom }}</strong>
+                                        </td>
+                                        <td>{{ candidature.etudiant.email }}</td>
+                                        <td>{{ candidature.dateCandidature|date('d/m/Y H:i') }}</td>
+                                        <td>
+                                            {% if candidature.statut == 'accepte' %}
+                                                <span class="badge bg-success">Acceptée</span>
+                                            {% elseif candidature.statut == 'refuse' %}
+                                                <span class="badge bg-danger">Refusée</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">En attente</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if candidature.notes %}
+                                                <button type="button" class="btn btn-sm btn-outline-info"
+                                                        data-bs-toggle="popover"
+                                                        title="Message de motivation"
+                                                        data-bs-content="{{ candidature.notes }}">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune candidature pour cette offre</h5>
+                            <p class="text-muted">Les candidatures apparaîtront ici lorsqu'elles seront reçues.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
