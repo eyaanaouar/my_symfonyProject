@@ -1,5 +1,5 @@
 <?php
-// src/Entity/OffreStage.php
+
 
 namespace App\Entity;
 
@@ -155,9 +155,7 @@ class OffreStage
         return $this;
     }
 
-    /**
-     * @return Collection<int, Candidature>
-     */
+
     public function getCandidatures(): Collection
     {
         return $this->candidatures;

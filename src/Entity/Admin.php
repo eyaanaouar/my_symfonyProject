@@ -1,5 +1,4 @@
 <?php
-// src/Entity/Admin.php
 
 namespace App\Entity;
 
@@ -82,7 +81,7 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // Implémentation de UserInterface et PasswordAuthenticatedUserInterface
+
     public function getRoles(): array
     {
         return ['ROLE_ADMIN'];
@@ -107,10 +106,9 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->email;
     }
-
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
+
     }
 
     public function __toString(): string

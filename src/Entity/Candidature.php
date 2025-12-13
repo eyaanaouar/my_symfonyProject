@@ -1,5 +1,5 @@
 <?php
-// src/Entity/Candidature.php
+
 
 namespace App\Entity;
 

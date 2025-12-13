@@ -1,0 +1,333 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Offres de Stage{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-briefcase me-2"></i>Gestion des Offres de Stage
+                </h1>
+                <div>
+                    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+                    </a>
+                    <button class="btn btn-info ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#filters">
+                        <i class="fas fa-filter me-2"></i>Filtrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="row mb-4 collapse" id="filters">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <select class="form-select" id="filterStatus">
+                                <option value="all">Tous les statuts</option>
+                                <option value="valid">Validées</option>
+                                <option value="pending">En attente</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <select class="form-select" id="filterCompany">
+                                <option value="all">Toutes les entreprises</option>
+                                {% set entreprisesUniques = [] %}
+                                {% for offre in offres %}
+                                    {% if offre.entreprise.id not in entreprisesUniques|map(e => e.id) %}
+                                        {% set entreprisesUniques = entreprisesUniques|merge([offre.entreprise]) %}
+                                        <option value="{{ offre.entreprise.id }}">{{ offre.entreprise.nom }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="filterSearch" placeholder="Rechercher par titre...">
+                                <button class="btn btn-outline-secondary" type="button" id="resetFilters">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if offres|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="offresTable">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Titre</th>
+                                    <th>Entreprise</th>
+                                    <th>Description</th>
+                                    <th>Période</th>
+                                    <th>Candidatures</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for offre in offres %}
+                                    <tr data-status="{{ offre.estValide ? 'valid' : 'pending' }}"
+                                        data-company="{{ offre.entreprise.id }}"
+                                        data-search="{{ offre.titre|lower }}">
+                                        <td>{{ offre.id }}</td>
+                                        <td>
+                                            <strong>{{ offre.titre }}</strong>
+                                            {% if offre.lettreMotivationRequise %}
+                                                <span class="badge bg-info ms-1">Lettre requise</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-building text-muted me-2"></i>
+                                                {{ offre.entreprise.nom }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if offre.description %}
+                                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                        data-bs-toggle="popover"
+                                                        title="Description complète"
+                                                        data-bs-content="{{ offre.description }}">
+                                                    <i class="fas fa-eye"></i> Voir
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>
+                                                Du {{ offre.dateDebut|date('d/m/Y') }}<br>
+                                                au {{ offre.dateFin|date('d/m/Y') }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ offre.candidatures|length > 0 ? 'primary' : 'secondary' }}">
+                                                {{ offre.candidatures|length }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if offre.estValide %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Validée
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>En attente
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                {% if not offre.estValide %}
+                                                    <a href="{{ path('app_admin_offre_valider', {'id': offre.id}) }}"
+                                                       class="btn btn-sm btn-success"
+                                                       onclick="return confirm('Valider cette offre de stage ?')"
+                                                       title="Valider">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                    <a href="{{ path('app_admin_offre_refuser', {'id': offre.id}) }}"
+                                                       class="btn btn-sm btn-danger"
+                                                       onclick="return confirm('Refuser cette offre de stage ?')"
+                                                       title="Refuser">
+                                                        <i class="fas fa-times"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{{ path('app_admin_offre_refuser', {'id': offre.id}) }}"
+                                                       class="btn btn-sm btn-warning"
+                                                       onclick="return confirm('Retirer la validation de cette offre ?')"
+                                                       title="Invalider">
+                                                        <i class="fas fa-ban"></i>
+                                                    </a>
+                                                {% endif %}
+                                                <a href="{{ path('app_entreprise_candidatures', {'id': offre.id}) }}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="Voir les candidatures"
+                                                   target="_blank">
+                                                    <i class="fas fa-users"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Statistiques -->
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4 class="card-title">{{ offres|length }}</h4>
+                                                <p class="card-text mb-0">Total offres</p>
+                                            </div>
+                                            <div class="align-self-center">
+                                                <i class="fas fa-briefcase fa-2x"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                {% set offresValides = 0 %}
+                                                {% for offre in offres %}
+                                                    {% if offre.estValide %}
+                                                        {% set offresValides = offresValides + 1 %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <h4 class="card-title">{{ offresValides }}</h4>
+                                                <p class="card-text mb-0">Offres validées</p>
+                                            </div>
+                                            <div class="align-self-center">
+                                                <i class="fas fa-check-circle fa-2x"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                {% set offresEnAttente = 0 %}
+                                                {% for offre in offres %}
+                                                    {% if not offre.estValide %}
+                                                        {% set offresEnAttente = offresEnAttente + 1 %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <h4 class="card-title">{{ offresEnAttente }}</h4>
+                                                <p class="card-text mb-0">En attente</p>
+                                            </div>
+                                            <div class="align-self-center">
+                                                <i class="fas fa-clock fa-2x"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="alert alert-info mt-4">
+                            <h6><i class="fas fa-info-circle me-2"></i>Guide d'utilisation :</h6>
+                            <ul class="mb-0">
+                                <li><span class="badge bg-success"><i class="fas fa-check"></i></span> Valider une offre : Elle devient visible pour les étudiants</li>
+                                <li><span class="badge bg-danger"><i class="fas fa-times"></i></span> Refuser une offre : L'offre reste invisible</li>
+                                <li><span class="badge bg-warning"><i class="fas fa-ban"></i></span> Invalider une offre : Retirer la validation</li>
+                                <li><span class="badge bg-primary"><i class="fas fa-users"></i></span> Voir les candidatures : Accéder aux candidatures reçues</li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune offre de stage à gérer</h5>
+                            <p class="text-muted">Les offres apparaîtront ici lorsqu'elles seront créées par les entreprises.</p>
+                            <a href="{{ path('app_create_test_offres') }}" class="btn btn-warning mt-2">
+                                <i class="fas fa-plus me-2"></i>Créer des offres de test
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        // Activer les popovers Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            // Popovers pour les descriptions
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+
+            // Filtres
+            const filterStatus = document.getElementById('filterStatus');
+            const filterCompany = document.getElementById('filterCompany');
+            const filterSearch = document.getElementById('filterSearch');
+            const resetFilters = document.getElementById('resetFilters');
+            const rows = document.querySelectorAll('#offresTable tbody tr');
+
+            // Extraire les entreprises uniques pour le filtre
+            const entreprises = {};
+            rows.forEach(row => {
+                const companyId = row.getAttribute('data-company');
+                const companyName = row.querySelector('td:nth-child(3)').textContent.trim();
+                if (!entreprises[companyId]) {
+                    entreprises[companyId] = companyName;
+                }
+            });
+
+            function applyFilters() {
+                const statusValue = filterStatus.value;
+                const companyValue = filterCompany.value;
+                const searchValue = filterSearch.value.toLowerCase();
+
+                rows.forEach(row => {
+                    const rowStatus = row.getAttribute('data-status');
+                    const rowCompany = row.getAttribute('data-company');
+                    const rowSearch = row.getAttribute('data-search');
+
+                    let show = true;
+
+                    // Filtre par statut
+                    if (statusValue !== 'all' && rowStatus !== statusValue) {
+                        show = false;
+                    }
+
+                    // Filtre par entreprise
+                    if (companyValue !== 'all' && rowCompany !== companyValue) {
+                        show = false;
+                    }
+
+                    // Filtre par recherche
+                    if (searchValue && !rowSearch.includes(searchValue)) {
+                        show = false;
+                    }
+
+                    row.style.display = show ? '' : 'none';
+                });
+            }
+
+            // Événements des filtres
+            filterStatus.addEventListener('change', applyFilters);
+            filterCompany.addEventListener('change', applyFilters);
+            filterSearch.addEventListener('input', applyFilters);
+
+            // Réinitialiser les filtres
+            resetFilters.addEventListener('click', function() {
+                filterStatus.value = 'all';
+                filterCompany.value = 'all';
+                filterSearch.value = '';
+                applyFilters();
+            });
+
+            // Appliquer les filtres au chargement
+            applyFilters();
+        });
+    </script>
+{% endblock %}

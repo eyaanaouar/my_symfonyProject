@@ -1,5 +1,4 @@
 <?php
-// src/Entity/Etudiant.php
 
 namespace App\Entity;
 
@@ -159,9 +158,7 @@ class Etudiant implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, AvisEntreprise>
-     */
+
     public function getAvisEntreprises(): Collection
     {
         return $this->avisEntreprises;
@@ -189,7 +186,7 @@ class Etudiant implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // Implémentation de UserInterface et PasswordAuthenticatedUserInterface
+
     public function getRoles(): array
     {
         return ['ROLE_ETUDIANT'];
@@ -217,7 +214,7 @@ class Etudiant implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
+
     }
 
     public function __toString(): string

@@ -81,4 +81,5 @@ class EtudiantController extends AbstractController
             'candidatures' => $candidatures,
         ]);
     }
+
 }

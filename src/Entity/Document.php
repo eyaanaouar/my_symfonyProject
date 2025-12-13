@@ -1,5 +1,4 @@
 <?php
-// src/Entity/Document.php
 
 namespace App\Entity;
 

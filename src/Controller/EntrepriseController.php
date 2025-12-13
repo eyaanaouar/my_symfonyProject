@@ -41,6 +41,9 @@ class EntrepriseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Valider automatiquement l'offre pour le développement
+            $offre->setEstValide(true); // ← AJOUTER CETTE LIGNE
+
             $entityManager->persist($offre);
             $entityManager->flush();
 
@@ -53,7 +56,6 @@ class EntrepriseController extends AbstractController
             'edit' => false,
         ]);
     }
-
     #[Route('/offre/{id}/edit', name: 'app_entreprise_offre_edit')]
     public function editOffre(Request $request, OffreStage $offre, EntityManagerInterface $entityManager): Response
     {
@@ -61,7 +63,7 @@ class EntrepriseController extends AbstractController
 
         // Vérifier que l'offre appartient à l'entreprise connectée
         if ($offre->getEntreprise() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
+            throw $this->createAccessDeniedException('Vous ne pouvez pas modifier cette offre.');
         }
 
         $form = $this->createForm(OffreStageType::class, $offre);
@@ -80,7 +82,6 @@ class EntrepriseController extends AbstractController
             'offre' => $offre,
         ]);
     }
-
     #[Route('/candidatures/{id}', name: 'app_entreprise_candidatures')]
     public function candidatures(OffreStage $offre, EntityManagerInterface $entityManager): Response
     {
