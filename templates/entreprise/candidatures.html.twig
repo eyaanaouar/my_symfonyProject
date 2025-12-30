@@ -71,12 +71,21 @@
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                <a href="#" class="btn btn-sm btn-outline-success">
-                                                    <i class="fas fa-check"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-sm btn-outline-danger">
-                                                    <i class="fas fa-times"></i>
-                                                </a>
+                                                {% if candidature.statut != 'accepte' %}
+                                                    <a href="{{ path('app_candidature_accepter', {'id': candidature.id}) }}"
+                                                       class="btn btn-sm btn-outline-success"
+                                                       onclick="return confirm('Accepter cette candidature ?')">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                {% endif %}
+
+                                                {% if candidature.statut != 'refuse' %}
+                                                    <a href="{{ path('app_candidature_refuser', {'id': candidature.id}) }}"
+                                                       class="btn btn-sm btn-outline-danger"
+                                                       onclick="return confirm('Refuser cette candidature ?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </a>
+                                                {% endif %}
                                             </div>
                                         </td>
                                     </tr>
@@ -95,4 +104,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Activer les popovers Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+        });
+    </script>
 {% endblock %}

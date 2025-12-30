@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\OffreStage;
 use App\Form\OffreStageType;
+use App\Entity\Candidature;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -97,6 +98,50 @@ class EntrepriseController extends AbstractController
         return $this->render('entreprise/candidatures.html.twig', [
             'candidatures' => $candidatures,
             'offre' => $offre,
+        ]);
+    }
+    #[Route('/candidature/{id}/accepter', name: 'app_candidature_accepter', methods: ['GET'])]
+    public function accepter(Candidature $candidature, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ENTREPRISE');
+
+        $entreprise = $this->getUser();
+        $offre = $candidature->getOffre();
+
+        if ($offre->getEntreprise() !== $entreprise) {
+            $this->addFlash('error', 'Vous n\'avez pas le droit de modifier cette candidature.');
+            return $this->redirectToRoute('app_entreprise_dashboard');
+        }
+
+        $candidature->setStatut('accepte');
+        $entityManager->flush();
+
+        $this->addFlash('success', 'La candidature a été acceptée.');
+
+        return $this->redirectToRoute('app_entreprise_candidatures', [
+            'id' => $offre->getId(),
+        ]);
+    }
+    #[Route('/candidature/{id}/refuser', name: 'app_candidature_refuser', methods: ['GET'])]
+    public function refuser(Candidature $candidature, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ENTREPRISE');
+
+        $entreprise = $this->getUser();
+        $offre = $candidature->getOffre();
+
+        if ($offre->getEntreprise() !== $entreprise) {
+            $this->addFlash('error', 'Vous n\'avez pas le droit de modifier cette candidature.');
+            return $this->redirectToRoute('app_entreprise_dashboard');
+        }
+
+        $candidature->setStatut('refuse');
+        $entityManager->flush();
+
+        $this->addFlash('success', 'La candidature a été refusée.');
+
+        return $this->redirectToRoute('app_entreprise_candidatures', [
+            'id' => $offre->getId(),
         ]);
     }
 }

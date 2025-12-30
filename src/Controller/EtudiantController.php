@@ -4,6 +4,8 @@
 namespace App\Controller;
 
 use App\Entity\Candidature;
+use App\Entity\Feedback;
+use App\Form\FeedbackType;
 use App\Entity\OffreStage;
 use App\Form\CandidatureType;
 use Doctrine\ORM\EntityManagerInterface;
