@@ -1,14 +1,14 @@
 <?php
-// src/Form/CandidatureType.php
 
 namespace App\Form;
 
 use App\Entity\Candidature;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
+use Symfony\Component\Validator\Constraints\File;
 
 class CandidatureType extends AbstractType
 {
@@ -23,6 +23,32 @@ class CandidatureType extends AbstractType
                     'rows' => 4,
                     'placeholder' => 'Expliquez pourquoi vous êtes intéressé par ce stage...'
                 ]
+            ])
+            ->add('cv', FileType::class, [
+                'label' => 'Votre CV (Format PDF)',
+                'mapped' => false,
+                'required' => true,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => ['application/pdf'],
+                        'mimeTypesMessage' => 'Veuillez uploader un document PDF valide',
+                    ])
+                ],
+                'attr' => ['class' => 'form-control']
+            ])
+            ->add('lettre_motivation', FileType::class, [
+                'label' => 'Lettre de motivation (Format PDF)',
+                'mapped' => false,
+                'required' => true,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => ['application/pdf'],
+                        'mimeTypesMessage' => 'Veuillez uploader un document PDF valide',
+                    ])
+                ],
+                'attr' => ['class' => 'form-control']
             ])
         ;
     }

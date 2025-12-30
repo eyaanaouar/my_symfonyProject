@@ -29,14 +29,15 @@
                 <div class="card-body">
                     {% if candidatures|length > 0 %}
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table class="table table-striped align-middle">
                                 <thead>
                                 <tr>
                                     <th>Étudiant</th>
                                     <th>Email</th>
-                                    <th>Date de candidature</th>
+                                    <th>Date</th>
                                     <th>Statut</th>
                                     <th>Message</th>
+                                    <th>Documents</th> {# Nouvelle colonne #}
                                     <th>Actions</th>
                                 </tr>
                                 </thead>
@@ -69,6 +70,32 @@
                                                 <span class="text-muted">-</span>
                                             {% endif %}
                                         </td>
+
+                                        {# SECTION DOCUMENTS AJOUTÉE #}
+                                        <td>
+                                            <div class="btn-group">
+                                                {% for document in candidature.documents %}
+                                                    {% if document.typeDocument == 'CV' %}
+                                                        <a href="{{ asset('uploads/documents/' ~ document.cheminFichier) }}"
+                                                           class="btn btn-sm btn-primary"
+                                                           target="_blank"
+                                                           title="Voir le CV">
+                                                            <i class="fas fa-file-pdf"></i> CV
+                                                        </a>
+                                                    {% elseif document.typeDocument == 'Lettre de Motivation' %}
+                                                        <a href="{{ asset('uploads/documents/' ~ document.cheminFichier) }}"
+                                                           class="btn btn-sm btn-secondary"
+                                                           target="_blank"
+                                                           title="Voir la Lettre de Motivation">
+                                                            <i class="fas fa-file-alt"></i> LM
+                                                        </a>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-light text-dark">Aucun document</span>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+
                                         <td>
                                             <div class="btn-group">
                                                 {% if candidature.statut != 'accepte' %}
@@ -106,7 +133,6 @@
     </div>
 
     <script>
-        // Activer les popovers Bootstrap
         document.addEventListener('DOMContentLoaded', function() {
             const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
             const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));

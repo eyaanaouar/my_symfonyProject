@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Entity\Candidature;
 use App\Entity\Feedback;
 use App\Form\FeedbackType;
+use App\Entity\Document;
 use App\Entity\OffreStage;
 use App\Form\CandidatureType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -13,6 +14,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
+
 
 #[Route('/etudiant')]
 class EtudiantController extends AbstractController
@@ -45,7 +48,7 @@ class EtudiantController extends AbstractController
     }
 
     #[Route('/candidater/{id}', name: 'app_etudiant_candidater')]
-    public function candidater(Request $request, OffreStage $offre, EntityManagerInterface $entityManager): Response
+    public function candidater(Request $request, OffreStage $offre, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ETUDIANT');
 
@@ -53,12 +56,22 @@ class EtudiantController extends AbstractController
         $candidature->setEtudiant($this->getUser());
         $candidature->setOffre($offre);
 
-
-
         $form = $this->createForm(CandidatureType::class, $candidature);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Gestion de l'upload du CV
+            $cvFile = $form->get('cv')->getData();
+            if ($cvFile) {
+                $this->uploadDocument($cvFile, 'CV', $candidature, $slugger, $entityManager);
+            }
+
+            // Gestion de l'upload de la lettre de motivation
+            $lmFile = $form->get('lettre_motivation')->getData();
+            if ($lmFile) {
+                $this->uploadDocument($lmFile, 'Lettre de Motivation', $candidature, $slugger, $entityManager);
+            }
+
             $entityManager->persist($candidature);
             $entityManager->flush();
 
@@ -70,6 +83,26 @@ class EtudiantController extends AbstractController
             'form' => $form->createView(),
             'offre' => $offre,
         ]);
+    }
+
+    private function uploadDocument($file, string $type, Candidature $candidature, SluggerInterface $slugger, EntityManagerInterface $em): void
+    {
+        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $slugger->slug($originalFilename);
+        $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+
+        $file->move(
+            $this->getParameter('documents_directory'),
+            $newFilename
+        );
+
+        $document = new Document();
+        $document->setTypeDocument($type);
+        $document->setCheminFichier($newFilename);
+        $document->setCandidature($candidature);
+        $document->setDateUpload(new \DateTime());
+
+        $em->persist($document);
     }
 
     #[Route('/candidatures', name: 'app_etudiant_candidatures')]

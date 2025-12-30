@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Entity;
 
 use App\Repository\CandidatureRepository;
@@ -35,40 +34,17 @@ class Candidature
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\OneToMany(mappedBy: 'candidature', targetEntity: Document::class)]
+    #[ORM\OneToMany(mappedBy: 'candidature', targetEntity: Document::class, cascade: ['persist', 'remove'])]
     private Collection $documents;
+
+    #[ORM\OneToOne(mappedBy: 'candidature', targetEntity: Feedback::class)]
+    private ?Feedback $feedback = null;
 
     public function __construct()
     {
         $this->documents = new ArrayCollection();
         $this->dateCandidature = new \DateTime();
         $this->statut = 'en_attente';
-    }
-    // Dans src/Entity/Candidature.php
-
-    #[ORM\OneToOne(mappedBy: 'candidature', targetEntity: Feedback::class)]
-    private ?Feedback $feedback = null;
-
-    public function getFeedback(): ?Feedback
-    {
-        return $this->feedback;
-    }
-
-    public function setFeedback(?Feedback $feedback): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($feedback === null && $this->feedback !== null) {
-            $this->feedback->setCandidature(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($feedback !== null && $feedback->getCandidature() !== $this) {
-            $feedback->setCandidature($this);
-        }
-
-        $this->feedback = $feedback;
-
-        return $this;
     }
 
     public function getId(): ?int
@@ -84,7 +60,6 @@ class Candidature
     public function setEtudiant(?Etudiant $etudiant): static
     {
         $this->etudiant = $etudiant;
-
         return $this;
     }
 
@@ -96,7 +71,6 @@ class Candidature
     public function setOffre(?OffreStage $offre): static
     {
         $this->offre = $offre;
-
         return $this;
     }
 
@@ -108,7 +82,6 @@ class Candidature
     public function setDateCandidature(\DateTimeInterface $dateCandidature): static
     {
         $this->dateCandidature = $dateCandidature;
-
         return $this;
     }
 
@@ -120,7 +93,6 @@ class Candidature
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
-
         return $this;
     }
 
@@ -132,7 +104,6 @@ class Candidature
     public function setNotes(?string $notes): static
     {
         $this->notes = $notes;
-
         return $this;
     }
 
@@ -150,24 +121,38 @@ class Candidature
             $this->documents->add($document);
             $document->setCandidature($this);
         }
-
         return $this;
     }
 
     public function removeDocument(Document $document): static
     {
         if ($this->documents->removeElement($document)) {
-            // set the owning side to null (unless already changed)
             if ($document->getCandidature() === $this) {
                 $document->setCandidature(null);
             }
         }
+        return $this;
+    }
 
+    public function getFeedback(): ?Feedback
+    {
+        return $this->feedback;
+    }
+
+    public function setFeedback(?Feedback $feedback): static
+    {
+        if ($feedback === null && $this->feedback !== null) {
+            $this->feedback->setCandidature(null);
+        }
+        if ($feedback !== null && $feedback->getCandidature() !== $this) {
+            $feedback->setCandidature($this);
+        }
+        $this->feedback = $feedback;
         return $this;
     }
 
     public function __toString(): string
     {
-        return 'Candidature de ' . $this->etudiant . ' pour ' . $this->offre;
+        return 'Candidature de ' . ($this->etudiant ? $this->etudiant->getNom() : 'Inconnu') . ' pour ' . ($this->offre ? $this->offre->getTitre() : 'Offre inconnue');
     }
 }
