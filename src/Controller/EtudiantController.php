@@ -51,6 +51,8 @@ class EtudiantController extends AbstractController
         $candidature->setEtudiant($this->getUser());
         $candidature->setOffre($offre);
 
+
+
         $form = $this->createForm(CandidatureType::class, $candidature);
         $form->handleRequest($request);
 
@@ -79,6 +81,43 @@ class EtudiantController extends AbstractController
 
         return $this->render('etudiant/candidatures.html.twig', [
             'candidatures' => $candidatures,
+        ]);
+    }
+    // Dans src/Controller/EtudiantController.php
+
+    #[Route('/feedback/{id}', name: 'app_etudiant_feedback')]
+    public function addFeedback(Request $request, Candidature $candidature, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ETUDIANT');
+
+        // Vérifier que la candidature appartient à l'étudiant et qu'elle est acceptée
+        if ($candidature->getEtudiant() !== $this->getUser() || $candidature->getStatut() !== 'accepte') {
+            throw $this->createAccessDeniedException("Vous ne pouvez pas laisser de feedback pour ce stage.");
+        }
+
+        // Vérifier si un feedback existe déjà
+        if ($candidature->getFeedback()) {
+            $this->addFlash('warning', 'Vous avez déjà donné votre avis pour ce stage.');
+            return $this->redirectToRoute('app_etudiant_dashboard');
+        }
+
+        $feedback = new Feedback();
+        $feedback->setCandidature($candidature);
+
+        $form = $this->createForm(FeedbackType::class, $feedback);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($feedback);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Merci pour votre feedback !');
+            return $this->redirectToRoute('app_etudiant_dashboard');
+        }
+
+        return $this->render('etudiant/feedback.html.twig', [
+            'form' => $form->createView(),
+            'candidature' => $candidature
         ]);
     }
 

@@ -44,6 +44,32 @@ class Candidature
         $this->dateCandidature = new \DateTime();
         $this->statut = 'en_attente';
     }
+    // Dans src/Entity/Candidature.php
+
+    #[ORM\OneToOne(mappedBy: 'candidature', targetEntity: Feedback::class)]
+    private ?Feedback $feedback = null;
+
+    public function getFeedback(): ?Feedback
+    {
+        return $this->feedback;
+    }
+
+    public function setFeedback(?Feedback $feedback): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($feedback === null && $this->feedback !== null) {
+            $this->feedback->setCandidature(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($feedback !== null && $feedback->getCandidature() !== $this) {
+            $feedback->setCandidature($this);
+        }
+
+        $this->feedback = $feedback;
+
+        return $this;
+    }
 
     public function getId(): ?int
     {
