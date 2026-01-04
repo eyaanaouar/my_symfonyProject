@@ -6,45 +6,48 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>
-                    <i class="fas fa-briefcase me-2"></i>Offres de Stage
-                </h1>
-                <a href="{{ path('app_etudiant_dashboard') }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
-                </a>
+                <h1><i class="fas fa-briefcase me-2"></i>Offres de Stage</h1>
             </div>
         </div>
     </div>
 
-    <div class="row">
+    <!-- BARRE DE RECHERCHE -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control border-start-0"
+                               placeholder="Rechercher par titre de stage ou nom de l'entreprise...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="offresContainer">
         {% if offres|length > 0 %}
             {% for offre in offres %}
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">{{ offre.titre }}</h5>
-                            <small class="text-muted">{{ offre.entreprise.nom }}</small>
+                <div class="col-md-6 col-lg-4 mb-4 offre-card">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0 text-primary">{{ offre.titre }}</h5>
+                            <small class="text-muted company-name"><i class="fas fa-building me-1"></i>{{ offre.entreprise.nom }}</small>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">
-                                {% if offre.description|length > 150 %}
-                                    {{ offre.description|slice(0, 150) }}...
-                                {% else %}
-                                    {{ offre.description }}
-                                {% endif %}
-                            </p>
+                            <p class="card-text text-truncate-3">{{ offre.description }}</p>
                             <div class="mb-2">
                                 <small class="text-muted">
                                     <i class="fas fa-calendar me-1"></i>
                                     Du {{ offre.dateDebut|date('d/m/Y') }} au {{ offre.dateFin|date('d/m/Y') }}
                                 </small>
                             </div>
-                            {% if offre.lettreMotivationRequise %}
-                                <span class="badge bg-info">Lettre de motivation requise</span>
-                            {% endif %}
                         </div>
-                        <div class="card-footer">
-                            <div class="d-grid gap-2">
+                        <div class="card-footer bg-white border-top-0">
+                            <div class="d-grid">
                                 <a href="{{ path('app_etudiant_candidater', {'id': offre.id}) }}" class="btn btn-primary">
                                     <i class="fas fa-paper-plane me-2"></i>Postuler
                                 </a>
@@ -54,15 +57,28 @@
                 </div>
             {% endfor %}
         {% else %}
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Aucune offre de stage disponible</h5>
-                        <p class="text-muted">Revenez plus tard pour découvrir de nouvelles offres.</p>
-                    </div>
-                </div>
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Aucune offre de stage disponible</h5>
             </div>
         {% endif %}
     </div>
+
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let cards = document.getElementsByClassName('offre-card');
+
+            for (let i = 0; i < cards.length; i++) {
+                let title = cards[i].querySelector('.card-title').innerText.toLowerCase();
+                let company = cards[i].querySelector('.company-name').innerText.toLowerCase();
+
+                if (title.includes(filter) || company.includes(filter)) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+        });
+    </script>
 {% endblock %}
