@@ -16,25 +16,33 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-
 #[Route('/etudiant')]
 class EtudiantController extends AbstractController
 {
+    // Cette fonction n'est plus appelée, mais nous la laissons
+    // au cas où vous l'utiliseriez ailleurs.
     private function checkValidation(): ?Response
     {
         $user = $this->getUser();
-        if ($user && method_exists($user, 'isEstValide') && !$user->isEstValide()) {
+        // Correction pour utiliser getEstValide()
+        if ($user && method_exists($user, 'getEstValide') && !$user->getEstValide()) {
             $this->addFlash('danger', 'Votre compte est en attente d\'approbation par l\'administrateur.');
             return $this->redirectToRoute('app_home'); // Redirige vers l'accueil
         }
         return null;
     }
+
+    // La méthode dashboard est SIMPLIFIÉE.
+    // Plus besoin de TokenStorage ou de Request ici.
     #[Route('/', name: 'app_etudiant_dashboard')]
     public function dashboard(EntityManagerInterface $entityManager): Response
     {
+        // Cette ligne suffit. Si l'utilisateur n'a pas le bon rôle, il est bloqué.
+        // Le LoginListener a déjà vérifié si le compte était valide.
         $this->denyAccessUnlessGranted('ROLE_ETUDIANT');
 
         $etudiant = $this->getUser();
+
         $candidatures = $entityManager->getRepository(Candidature::class)
             ->findBy(['etudiant' => $etudiant]);
 
@@ -49,13 +57,14 @@ class EtudiantController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ETUDIANT');
 
         $offres = $entityManager->getRepository(OffreStage::class)
-            ->findBy(['estValide' => true]);
+            ->findBy(['estValide' => true]); // On ne montre que les offres validées
 
         return $this->render('etudiant/offres.html.twig', [
             'offres' => $offres,
         ]);
     }
 
+    // ... Le reste du contrôleur reste identique ...
     #[Route('/candidater/{id}', name: 'app_etudiant_candidater')]
     public function candidater(Request $request, OffreStage $offre, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
@@ -127,19 +136,16 @@ class EtudiantController extends AbstractController
             'candidatures' => $candidatures,
         ]);
     }
-    // Dans src/Controller/EtudiantController.php
 
     #[Route('/feedback/{id}', name: 'app_etudiant_feedback')]
     public function addFeedback(Request $request, Candidature $candidature, EntityManagerInterface $entityManager): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ETUDIANT');
 
-        // Vérifier que la candidature appartient à l'étudiant et qu'elle est acceptée
         if ($candidature->getEtudiant() !== $this->getUser() || $candidature->getStatut() !== 'accepte') {
             throw $this->createAccessDeniedException("Vous ne pouvez pas laisser de feedback pour ce stage.");
         }
 
-        // Vérifier si un feedback existe déjà
         if ($candidature->getFeedback()) {
             $this->addFlash('warning', 'Vous avez déjà donné votre avis pour ce stage.');
             return $this->redirectToRoute('app_etudiant_dashboard');
@@ -164,5 +170,4 @@ class EtudiantController extends AbstractController
             'candidature' => $candidature
         ]);
     }
-
 }

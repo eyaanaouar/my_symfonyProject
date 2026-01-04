@@ -34,8 +34,10 @@ class Etudiant implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: "date_inscription", type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateInscription = null;
 
-    #[ORM\Column(type: 'boolean')]
-    private bool $estValide = false;
+    #[ORM\Column(name: "est_valide", type: "integer")]
+    private int $estValide = 0;
+
+
 
     #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: Candidature::class)]
     private Collection $candidatures;
@@ -58,10 +60,15 @@ class Etudiant implements UserInterface, PasswordAuthenticatedUserInterface
     public function setMdp(string $mdp): static { $this->mdp = $mdp; return $this; }
     public function getDateInscription(): ?\DateTimeInterface { return $this->dateInscription; }
     public function setDateInscription(\DateTimeInterface $dateInscription): static { $this->dateInscription = $dateInscription; return $this; }
-
-    public function isEstValide(): bool { return $this->estValide; }
-    public function setEstValide(bool $estValide): static { $this->estValide = $estValide; return $this; }
-
+    public function getEstValide(): int
+    {
+        return (int) $this->estValide;
+    }
+    public function setEstValide(int $estValide): static
+    {
+        $this->estValide = $estValide;
+        return $this;
+    }
     public function getRoles(): array { return ['ROLE_ETUDIANT']; }
     public function getPassword(): string { return $this->mdp; }
     public function getSalt(): ?string { return null; }

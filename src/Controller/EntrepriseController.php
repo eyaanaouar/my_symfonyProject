@@ -25,12 +25,23 @@ class EntrepriseController extends AbstractController
         return null;
     }
 
+    // Dans src/Controller/EntrepriseController.php
+
     #[Route('/', name: 'app_entreprise_dashboard')]
-    public function dashboard(EntityManagerInterface $entityManager): Response
+    public function dashboard(EntityManagerInterface $entityManager, \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface $tokenStorage, \Symfony\Component\HttpFoundation\Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ENTREPRISE');
 
         $entreprise = $this->getUser();
+
+        // BLOCAGE DE CONNEXION SI NON VALIDÉ
+        if ($entreprise->getEstValide() === 0) {
+            $tokenStorage->setToken(null); // Déconnexion forcée
+            $request->getSession()->invalidate(); // Invalidation de la session
+            $this->addFlash('danger', 'Votre compte entreprise est en attente de validation par l\'administrateur.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $offres = $entityManager->getRepository(OffreStage::class)
             ->findBy(['entreprise' => $entreprise]);
 
@@ -39,6 +50,7 @@ class EntrepriseController extends AbstractController
             'entreprise' => $entreprise,
         ]);
     }
+
 
     #[Route('/offre/new', name: 'app_entreprise_offre_new')]
     public function newOffre(Request $request, EntityManagerInterface $entityManager): Response
