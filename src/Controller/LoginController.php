@@ -13,15 +13,21 @@ class LoginController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function index(AuthenticationUtils $authenticationUtils): Response
     {
-        // Si l'utilisateur est déjà connecté, rediriger vers la page appropriée
+        // Si l'utilisateur est déjà connecté, vérifier s'il est validé
         if ($this->getUser()) {
+            $user = $this->getUser();
+
+            // Vérifier si c'est un étudiant ou entreprise non validé
+            if (method_exists($user, 'isEstValide') && !$user->isEstValide()) {
+                // Déconnecter l'utilisateur non validé
+                $this->addFlash('danger', 'Votre compte est en attente de validation par l\'administrateur.');
+                return $this->redirectToRoute('app_logout');
+            }
+
             return $this->redirectBasedOnRole();
         }
 
-        // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-
-        // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('login/index.html.twig', [
@@ -46,10 +52,20 @@ class LoginController extends AbstractController
         }
 
         if ($this->isGranted('ROLE_ENTREPRISE')) {
+            // Vérifier si l'entreprise est validée
+            if (method_exists($user, 'isEstValide') && !$user->isEstValide()) {
+                $this->addFlash('danger', 'Votre compte entreprise est en attente de validation par l\'administrateur.');
+                return $this->redirectToRoute('app_logout');
+            }
             return $this->redirectToRoute('app_entreprise_dashboard');
         }
 
         if ($this->isGranted('ROLE_ETUDIANT')) {
+            // Vérifier si l'étudiant est validé
+            if (method_exists($user, 'isEstValide') && !$user->isEstValide()) {
+                $this->addFlash('danger', 'Votre compte étudiant est en attente de validation par l\'administrateur.');
+                return $this->redirectToRoute('app_logout');
+            }
             return $this->redirectToRoute('app_etudiant_dashboard');
         }
 

@@ -1,101 +1,83 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Tableau de bord Administrateur{% endblock %}
+{% block title %}Dashboard Admin{% endblock %}
 
 {% block body %}
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>
-                    <i class="fas fa-cogs me-2"></i>Tableau de bord Administrateur
-                </h1>
-            </div>
-        </div>
-    </div>
+    <div class="container mt-4">
+        <h1><i class="fas fa-shield-alt"></i> Administration - Approbations</h1>
 
-    <!-- Statistiques -->
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="card-title">{{ totalEtudiants }}</h4>
-                            <p class="card-text">Étudiants</p>
-                            <small>{{ etudiantsValides }} validés</small>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-graduation-cap fa-2x"></i>
-                        </div>
+        <div class="row mt-4">
+            <!-- Comptes Étudiants en attente -->
+            <div class="col-md-12 mb-4">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">Étudiants en attente d'approbation</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead><tr><th>Nom</th><th>Email</th><th>Action</th></tr></thead>
+                            <tbody>
+                            {% for etudiant in etudiantsEnAttente %}
+                                <tr>
+                                    <td>{{ etudiant.prenom }} {{ etudiant.nom }}</td>
+                                    <td>{{ etudiant.email }}</td>
+                                    <td>
+                                        <a href="{{ path('app_admin_etudiant_valider', {id: etudiant.id}) }}" class="btn btn-sm btn-success">Approuver</a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="3" class="text-center">Aucun étudiant en attente</td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <a href="{{ path('app_admin_etudiants') }}" class="stretched-link"></a>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="card-title">{{ totalEntreprises }}</h4>
-                            <p class="card-text">Entreprises</p>
-                            <small>{{ entreprisesValides }} validées</small>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-building fa-2x"></i>
-                        </div>
+            <!-- Comptes Entreprises en attente -->
+            <div class="col-md-12 mb-4">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">Entreprises en attente d'approbation</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead><tr><th>Entreprise</th><th>Email</th><th>Action</th></tr></thead>
+                            <tbody>
+                            {% for entreprise in entreprisesEnAttente %}
+                                <tr>
+                                    <td>{{ entreprise.nom }}</td>
+                                    <td>{{ entreprise.email }}</td>
+                                    <td>
+                                        <a href="{{ path('app_admin_entreprise_valider', {id: entreprise.id}) }}" class="btn btn-sm btn-success">Approuver</a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="3" class="text-center">Aucune entreprise en attente</td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <a href="{{ path('app_admin_entreprises') }}" class="stretched-link"></a>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card text-white bg-info">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="card-title">{{ totalOffres }}</h4>
-                            <p class="card-text">Offres de stage</p>
-                            <small>{{ offresValides }} validées</small>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-briefcase fa-2x"></i>
-                        </div>
-                    </div>
-                    <a href="{{ path('app_admin_offres') }}" class="stretched-link"></a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Actions rapides -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-tachometer-alt me-2"></i>Actions rapides
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <a href="{{ path('app_admin_etudiants') }}" class="btn btn-outline-primary w-100">
-                                <i class="fas fa-users me-2"></i>Gérer les étudiants
-                            </a>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <a href="{{ path('app_admin_entreprises') }}" class="btn btn-outline-success w-100">
-                                <i class="fas fa-building me-2"></i>Gérer les entreprises
-                            </a>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <a href="{{ path('app_admin_offres') }}" class="btn btn-outline-info w-100">
-                                <i class="fas fa-briefcase me-2"></i>Gérer les offres
-                            </a>
-                        </div>
+            <!-- Offres de stage en attente -->
+            <div class="col-md-12 mb-4">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">Offres de stage à valider</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead><tr><th>Titre</th><th>Entreprise</th><th>Action</th></tr></thead>
+                            <tbody>
+                            {% for offre in offresEnAttente %}
+                                <tr>
+                                    <td>{{ offre.titre }}</td>
+                                    <td>{{ offre.entreprise.nom }}</td>
+                                    <td>
+                                        <a href="{{ path('app_admin_offre_valider', {id: offre.id}) }}" class="btn btn-sm btn-warning">Publier l'offre</a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="3" class="text-center">Aucune offre en attente</td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

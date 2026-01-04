@@ -1,5 +1,4 @@
 <?php
-// src/Controller/AdminSetupController.php
 
 namespace App\Controller;
 
@@ -15,23 +14,31 @@ class AdminSetupController extends AbstractController
     #[Route('/setup-admin', name: 'app_setup_admin')]
     public function setupAdmin(UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
     {
-        // Vérifier si un admin existe déjà
-        $existingAdmin = $entityManager->getRepository(Admin::class)->findOneBy(['email' => 'admin@example.com']);
+        // 1. Vérifier si un admin existe déjà pour éviter les doublons
+        $existingAdmin = $entityManager->getRepository(Admin::class)->findOneBy(['email' => 'admin@admin.com']);
 
         if ($existingAdmin) {
-            return new Response('Admin existe déjà: admin@example.com / admin123');
+            return new Response('L\'administrateur existe déjà. <a href="/login">Se connecter</a>');
         }
 
-        // Créer un admin
+        // 2. Créer l'objet Admin
         $admin = new Admin();
-        $admin->setNom('Admin');
-        $admin->setPrenom('System');
-        $admin->setEmail('admin@example.com');
-        $admin->setMdp($passwordHasher->hashPassword($admin, 'admin123'));
+        $admin->setEmail('admin@admin.com');
+        $admin->setNom('ADMIN');
+        $admin->setPrenom('Principal');
 
+        // 3. Hasher le mot de passe
+        $hashedPassword = $passwordHasher->hashPassword($admin, 'admin123');
+        $admin->setMdp($hashedPassword);
+
+        // 4. Enregistrer en base de données
         $entityManager->persist($admin);
         $entityManager->flush();
 
-        return new Response('Admin créé:<br><br>Email: admin@example.com<br>Mot de passe: admin123<br><br><a href="/login">Se connecter</a>');
+        return new Response('Compte Administrateur créé avec succès !
+Email : admin@admin.com
+Password : admin123
+
+<a href="/login">Se connecter</a>');
     }
 }

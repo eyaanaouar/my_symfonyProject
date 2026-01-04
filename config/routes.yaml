@@ -1,11 +1,26 @@
 # config/routes.yaml
 
+# Route d'accueil explicite
+app_home:
+    path: /
+    controller: App\Controller\HomeController::index
+
+# Route setup admin explicite (pour éviter les conflits)
+app_setup_admin:
+    path: /setup-admin
+    controller: App\Controller\AdminSetupController::setupAdmin
+    methods: [GET]
+
 # Charge automatiquement toutes les routes depuis les contrôleurs
 controllers:
     resource:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+    # Exclure les routes déjà définies manuellement
+    exclude:
+        - '../src/Controller/HomeController.php'
+        - '../src/Controller/AdminSetupController.php'
 
 # Routes d'erreur
 framework:

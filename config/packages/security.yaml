@@ -1,12 +1,19 @@
 security:
+    # Important pour Symfony 5.4+
+    enable_authenticator_manager: true
+
+    # Hashers de mot de passe
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-        App\Entity\Etudiant: 'auto'
-        App\Entity\Entreprise: 'auto'
-        App\Entity\Admin: 'auto'
+        App\Entity\Etudiant:
+            algorithm: auto
+        App\Entity\Entreprise:
+            algorithm: auto
+        App\Entity\Admin:
+            algorithm: auto
 
+    # Fournisseurs d'utilisateurs
     providers:
-        # Définir plusieurs providers
         app_etudiant_provider:
             entity:
                 class: App\Entity\Etudiant
@@ -20,33 +27,75 @@ security:
                 class: App\Entity\Admin
                 property: email
 
-        # Provider principal qui combine tous les types d'utilisateurs
+        # Fournisseur en chaîne (essaie dans cet ordre)
         app_user_provider:
             chain:
                 providers: ['app_etudiant_provider', 'app_entreprise_provider', 'app_admin_provider']
 
+    # Firewalls
     firewalls:
+        # Firewall pour les routes de développement (pas de sécurité)
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        # Firewall principal pour toute l'application
         main:
             lazy: true
-            provider: app_user_provider  # Utiliser le provider chain
+            provider: app_user_provider
+            # IMPORTANT: Utilisez votre UserChecker personnalisé
+            user_checker: App\Security\UserChecker
+
+            # Configuration de la connexion par formulaire
             form_login:
                 login_path: app_login
                 check_path: app_login
                 username_parameter: email
                 password_parameter: password
                 enable_csrf: true
+                csrf_token_id: authenticate
+                # Options de redirection
+                always_use_default_target_path: false
+                default_target_path: /
+                target_path_parameter: '_target_path'
+                use_referer: false
+                # Gestion des erreurs
+                failure_path: app_login
+                success_handler: Symfony\Component\Security\Http\Authentication\DefaultAuthenticationSuccessHandler
+
+            # Configuration de la déconnexion
             logout:
                 path: app_logout
                 target: app_home
+                invalidate_session: true
+                delete_cookies:
+                    - PHPSESSID
 
+            # Désactiver les fonctionnalités non utilisées
+            remember_me: false
+            http_basic: false
+            anonymous: false
+
+    # Contrôle d'accès (ACL)
     access_control:
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/entreprise, roles: ROLE_ENTREPRISE }
-        - { path: ^/etudiant, roles: ROLE_ETUDIANT }
-        - { path: ^/login, roles: PUBLIC_ACCESS }
+        # === ROUTES PUBLIQUES (accessibles sans connexion) ===
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+        - { path: ^/home, roles: PUBLIC_ACCESS }
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/, roles: PUBLIC_ACCESS }
+        - { path: ^/setup-admin, roles: PUBLIC_ACCESS }
+
+        # === ROUTES ADMIN ===
+        - { path: ^/admin, roles: ROLE_ADMIN }
+
+        # === ROUTES ENTREPRISE (doivent être validées) ===
+        - { path: ^/entreprise, roles: ROLE_ENTREPRISE }
+
+        # === ROUTES ÉTUDIANT (doivent être validées) ===
+        - { path: ^/etudiant, roles: ROLE_ETUDIANT }
+
+    # Hiérarchie des rôles
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER, ROLE_ENTREPRISE, ROLE_ETUDIANT]
+        ROLE_ENTREPRISE: ROLE_USER
+        ROLE_ETUDIANT: ROLE_USER

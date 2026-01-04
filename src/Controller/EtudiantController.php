@@ -20,6 +20,15 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[Route('/etudiant')]
 class EtudiantController extends AbstractController
 {
+    private function checkValidation(): ?Response
+    {
+        $user = $this->getUser();
+        if ($user && method_exists($user, 'isEstValide') && !$user->isEstValide()) {
+            $this->addFlash('danger', 'Votre compte est en attente d\'approbation par l\'administrateur.');
+            return $this->redirectToRoute('app_home'); // Redirige vers l'accueil
+        }
+        return null;
+    }
     #[Route('/', name: 'app_etudiant_dashboard')]
     public function dashboard(EntityManagerInterface $entityManager): Response
     {

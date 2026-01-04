@@ -116,3 +116,4 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->prenom . ' ' . $this->nom;
     }
 }
+

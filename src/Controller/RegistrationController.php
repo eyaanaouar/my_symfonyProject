@@ -38,10 +38,14 @@ class RegistrationController extends AbstractController
                 )
             );
 
+            // IMPORTANT: Définir explicitement estValide à 0 (false)
+            // Par défaut, la BDD met 0, mais on le définit explicitement
+            $etudiant->setEstValide(false);
+
             $entityManager->persist($etudiant);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Votre compte étudiant a été créé avec succès!');
+            $this->addFlash('success', 'Votre compte étudiant a été créé avec succès! Il sera activé après validation par l\'administrateur.');
             return $this->redirectToRoute('app_login');
         }
 
@@ -66,13 +70,14 @@ class RegistrationController extends AbstractController
                 )
             );
 
-            // Marquer l'entreprise comme validée (ou pas selon votre logique métier)
-            $entreprise->setEstValide(true); // ← AJOUTER CETTE LIGNE
+            // IMPORTANT: Définir explicitement estValide à 0 (false)
+            // NE PAS appeler setEstValide(true) ici
+            $entreprise->setEstValide(false);
 
             $entityManager->persist($entreprise);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Votre compte entreprise a été créé avec succès!');
+            $this->addFlash('success', 'Votre compte entreprise a été créé avec succès! Il sera activé après validation par l\'administrateur.');
             return $this->redirectToRoute('app_login');
         }
 

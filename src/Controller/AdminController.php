@@ -1,5 +1,4 @@
 <?php
-// src/Controller/AdminController.php
 
 namespace App\Controller;
 
@@ -19,106 +18,45 @@ class AdminController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        // Statistiques
-        $totalEtudiants = count($entityManager->getRepository(Etudiant::class)->findAll());
-        $totalEntreprises = count($entityManager->getRepository(Entreprise::class)->findAll());
-        $totalOffres = count($entityManager->getRepository(OffreStage::class)->findAll());
-
-        $etudiantsValides = count($entityManager->getRepository(Etudiant::class)->findBy(['estValide' => true]));
-        $entreprisesValides = count($entityManager->getRepository(Entreprise::class)->findBy(['estValide' => true]));
-        $offresValides = count($entityManager->getRepository(OffreStage::class)->findBy(['estValide' => true]));
-
         return $this->render('admin/dashboard.html.twig', [
-            'totalEtudiants' => $totalEtudiants,
-            'totalEntreprises' => $totalEntreprises,
-            'totalOffres' => $totalOffres,
-            'etudiantsValides' => $etudiantsValides,
-            'entreprisesValides' => $entreprisesValides,
-            'offresValides' => $offresValides,
+            'totalEtudiants' => count($entityManager->getRepository(Etudiant::class)->findAll()),
+            'totalEntreprises' => count($entityManager->getRepository(Entreprise::class)->findAll()),
+            'totalOffres' => count($entityManager->getRepository(OffreStage::class)->findAll()),
+            'etudiantsEnAttente' => $entityManager->getRepository(Etudiant::class)->findBy(['estValide' => false]),
+            'entreprisesEnAttente' => $entityManager->getRepository(Entreprise::class)->findBy(['estValide' => false]),
+            'offresEnAttente' => $entityManager->getRepository(OffreStage::class)->findBy(['estValide' => false]),
         ]);
     }
 
-    #[Route('/etudiants', name: 'app_admin_etudiants')]
-    public function etudiants(EntityManagerInterface $entityManager): Response
-    {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
-        $etudiants = $entityManager->getRepository(Etudiant::class)->findAll();
-
-        return $this->render('admin/etudiants.html.twig', [
-            'etudiants' => $etudiants,
-        ]);
-    }
-
+    // VALIDATION ÉTUDIANT
     #[Route('/etudiant/{id}/valider', name: 'app_admin_etudiant_valider')]
     public function validerEtudiant(Etudiant $etudiant, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
         $etudiant->setEstValide(true);
         $entityManager->flush();
-
-        $this->addFlash('success', 'Étudiant validé avec succès!');
-        return $this->redirectToRoute('app_admin_etudiants');
+        $this->addFlash('success', 'Étudiant approuvé !');
+        return $this->redirectToRoute('app_admin_dashboard');
     }
 
-    #[Route('/entreprises', name: 'app_admin_entreprises')]
-    public function entreprises(EntityManagerInterface $entityManager): Response
-    {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
-        $entreprises = $entityManager->getRepository(Entreprise::class)->findAll();
-
-        return $this->render('admin/entreprises.html.twig', [
-            'entreprises' => $entreprises,
-        ]);
-    }
-
+    // VALIDATION ENTREPRISE
     #[Route('/entreprise/{id}/valider', name: 'app_admin_entreprise_valider')]
     public function validerEntreprise(Entreprise $entreprise, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
         $entreprise->setEstValide(true);
         $entityManager->flush();
-
-        $this->addFlash('success', 'Entreprise validée avec succès!');
-        return $this->redirectToRoute('app_admin_entreprises');
+        $this->addFlash('success', 'Entreprise approuvée !');
+        return $this->redirectToRoute('app_admin_dashboard');
     }
 
-    #[Route('/offres', name: 'app_admin_offres')]
-    public function offres(EntityManagerInterface $entityManager): Response
-    {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
-        $offres = $entityManager->getRepository(OffreStage::class)->findAll();
-
-        return $this->render('admin/offres.html.twig', [
-            'offres' => $offres,
-        ]);
-    }
-
+    // VALIDATION OFFRE
     #[Route('/offre/{id}/valider', name: 'app_admin_offre_valider')]
     public function validerOffre(OffreStage $offre, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
         $offre->setEstValide(true);
         $entityManager->flush();
-
-        $this->addFlash('success', 'Offre de stage validée avec succès!');
-        return $this->redirectToRoute('app_admin_offres');
+        $this->addFlash('success', 'L\'offre de stage a été publiée et est maintenant visible par les étudiants.');
+        return $this->redirectToRoute('app_admin_dashboard');
     }
 
-    #[Route('/offre/{id}/refuser', name: 'app_admin_offre_refuser')]
-    public function refuserOffre(OffreStage $offre, EntityManagerInterface $entityManager): Response
-    {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
-        $offre->setEstValide(false);
-        $entityManager->flush();
-
-        $this->addFlash('warning', 'Offre de stage refusée!');
-        return $this->redirectToRoute('app_admin_offres');
-    }
 }
+

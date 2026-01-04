@@ -15,6 +15,16 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/entreprise')]
 class EntrepriseController extends AbstractController
 {
+    private function checkValidation(): ?Response
+    {
+        $user = $this->getUser();
+        if ($user && method_exists($user, 'isEstValide') && !$user->isEstValide()) {
+            $this->addFlash('danger', 'Votre compte entreprise est en attente de validation.');
+            return $this->redirectToRoute('app_home');
+        }
+        return null;
+    }
+
     #[Route('/', name: 'app_entreprise_dashboard')]
     public function dashboard(EntityManagerInterface $entityManager): Response
     {
@@ -42,8 +52,7 @@ class EntrepriseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Valider automatiquement l'offre pour le développement
-            $offre->setEstValide(true); // ← AJOUTER CETTE LIGNE
+            $offre->setEstValide(false);
 
             $entityManager->persist($offre);
             $entityManager->flush();
